@@ -32,6 +32,16 @@ pub enum LoadType {
     SPtoA16,
     R16toSP(BigRegisterTarget),
     SP8toHL,
+    HLIfromA,      // LD (HL+),A  0x22
+    AfromHLI,      // LD A,(HL+)  0x2A
+    HLDfromA,      // LD (HL-),A  0x32
+    AfromHLD,      // LD A,(HL-)  0x3A
+    A16fromA,      // LD (a16),A  0xEA
+    AfromA16,      // LD A,(a16)  0xFA
+    FF00A8fromA,   // LDH (a8),A  0xE0
+    AfromFF00A8,   // LDH A,(a8)  0xF0
+    FF00CfromA,    // LD (C),A    0xE2
+    AfromFF00C,    // LD A,(C)    0xF2
 
 }
 
@@ -70,6 +80,8 @@ pub enum Instruction {
     DAA,
     NOP,
     HALT,
+    EI,
+    DI,
 }
 
 impl Instruction {
@@ -255,6 +267,21 @@ impl Instruction {
             // LD HL, SP+e8
             0xF8 => Some(Self::LD(LoadType::SP8toHL)),
 
+            // Last LD
+            0x22 => Some(Self::LD(LoadType::HLIfromA)),
+            0x2A => Some(Self::LD(LoadType::AfromHLI)),
+            0x32 => Some(Self::LD(LoadType::HLDfromA)),
+            0x3A => Some(Self::LD(LoadType::AfromHLD)),
+
+            0xEA => Some(Self::LD(LoadType::A16fromA)),
+            0xFA => Some(Self::LD(LoadType::AfromA16)),
+
+            0xE0 => Some(Self::LD(LoadType::FF00A8fromA)),
+            0xF0 => Some(Self::LD(LoadType::AfromFF00A8)),
+            0xE2 => Some(Self::LD(LoadType::FF00CfromA)),
+            0xF2 => Some(Self::LD(LoadType::AfromFF00C)),
+
+
             // JR e8 / JR cc,e8
             0x18 => Some(Self::JR(JumpTest::Always)),
             0x20 => Some(Self::JR(JumpTest::NotZero)),
@@ -338,6 +365,11 @@ impl Instruction {
             0x17 => Some(Self::RLA),
             0x0F => Some(Self::RRCA),
             0x1F => Some(Self::RRA),
+
+
+            // EI / DI
+            0xFB => Some(Instruction::EI),
+            0xF3 => Some(Instruction::DI),
 
             _ => None,
         }

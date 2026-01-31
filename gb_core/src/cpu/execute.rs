@@ -382,6 +382,74 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_hc(((sp_low & 0x0F) + (off_u & 0x0F)) > 0x0F);
                 }
 
+                LoadType::HLIfromA => {
+                    let addr = cpu.regs.get_hl();
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                    cpu.regs.set_hl(addr.wrapping_add(1));
+                }
+
+                LoadType::AfromHLI => {
+                    let addr = cpu.regs.get_hl();
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                    cpu.regs.set_hl(addr.wrapping_add(1));
+                }
+
+                LoadType::HLDfromA => {
+                    let addr = cpu.regs.get_hl();
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                    cpu.regs.set_hl(addr.wrapping_sub(1));
+                }
+
+                LoadType::AfromHLD => {
+                    let addr = cpu.regs.get_hl();
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                    cpu.regs.set_hl(addr.wrapping_sub(1));
+                }
+
+                LoadType::A16fromA => {
+                    let addr = cpu.next_word();
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                }
+
+                LoadType::AfromA16 => {
+                    let addr = cpu.next_word();
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                }
+
+                LoadType::FF00A8fromA => {
+                    let a8 = cpu.next_byte() as u16;
+                    let addr = 0xFF00u16.wrapping_add(a8);
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                }
+
+                LoadType::AfromFF00A8 => {
+                    let a8 = cpu.next_byte() as u16;
+                    let addr = 0xFF00u16.wrapping_add(a8);
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                }
+
+                LoadType::FF00CfromA => {
+                    let c = cpu.regs.c() as u16;
+                    let addr = 0xFF00u16.wrapping_add(c);
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                }
+
+                LoadType::AfromFF00C => {
+                    let c = cpu.regs.c() as u16;
+                    let addr = 0xFF00u16.wrapping_add(c);
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                }
+
                 _ => {}
             }
         }
@@ -499,6 +567,16 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(carry != 0);
         },
+
+        Instruction::EI => {
+            cpu.ime_scheduled = true;
+        }
+
+        Instruction::DI => {
+            cpu.ime = false;
+            cpu.ime_scheduled = false;
+        }
+
 
 
         _ => {}

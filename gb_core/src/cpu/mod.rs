@@ -18,6 +18,7 @@ pub struct Cpu {
 
     pub ime: bool,
     pub ime_scheduled: bool,
+    pub ime_pending: bool,
 
     pub fetch_pc: u16,
     pub fetch_pc_valid: bool,
@@ -35,6 +36,7 @@ impl Cpu {
 
             ime: false,
             ime_scheduled: false,
+            ime_pending: false,
 
             fetch_pc: 0,
             fetch_pc_valid: false,
@@ -110,29 +112,39 @@ impl Cpu {
             return;
         }
 
+        if self.service_interrupts() {
+            return;
+            }
+
         
 
-      self.begin_instruction();
+        self.begin_instruction();
 
-    let mut opcode = self.fetch_u8();
-    let prefixed = opcode == 0xCB;
-    if prefixed {
-        opcode = self.fetch_u8();
-    }
+        let mut opcode = self.fetch_u8();
+        
+        // prefixed instruction
 
-    let instr = Instruction::decode(opcode, prefixed)
-        .unwrap_or_else(|| panic!("Unknown opcode: 0x{:02X} (prefixed={})", opcode, prefixed));
+        if opcode == 0xCB {
+            let cb_opcode = self.fetch_u8();
+            Self::exec_cb(self, cb_opcode);
+            self.end_instruction();
+            return;
+        }
 
-    execute(self, instr, prefixed);
+        let instr = Instruction::decode(opcode, false)
+            .unwrap();
+        execute(self, instr, false);
 
-    self.end_instruction();
+        let was_ei = matches!(instr, Instruction::EI);
 
-       
-    if self.ime_scheduled {
+        self.end_instruction();
+
+        if self.ime_scheduled && !was_ei {
             self.ime = true;
             self.ime_scheduled = false;
         }
-    }
+
+        }
 
     #[inline]
     pub fn next_byte(&mut self) -> u8 {
@@ -173,6 +185,31 @@ impl Cpu {
         for _ in 0..steps {
             self.step();
         }
+    }
+
+    fn service_interrupts(&mut self) -> bool {
+        let pending = self.pending_mask();
+
+        if self.ime && pending != 0 {
+            if let Some((bit, addr)) = Cpu::highest_priority(pending) {
+                // Clear IF flag
+                let iflag = self.bus.read_byte(0xFF0F);
+                self.bus.write_byte(0xFF0F, iflag & !bit);
+
+                // Disable IME
+                self.ime = false;
+
+                // Push PC to stack
+                self.push_word(self.pc);
+
+                // Jump to interrupt vector
+                self.pc = addr;
+
+                return true;
+            }
+        }
+
+        false
     }
 
     pub fn add(&mut self, value: u8) -> u8{
@@ -219,5 +256,125 @@ impl Cpu {
         self.regs.set_hc((self.regs.a_reg & 0xF) < (value & 0xF));
         new_value
     }
+
+    // CB Shi
+    fn read_CB(&mut self, reg: u8) -> u8 {
+        match reg {
+            0x00 => self.regs.b(),
+            0x01 => self.regs.c(),
+            0x02 => self.regs.d(),
+            0x03 => self.regs.e(),
+            0x04 => self.regs.h(),
+            0x05 => self.regs.l(),
+            0x06 => {
+                let addr = self.regs.get_hl();
+                self.bus.read_byte(addr)
+            }
+            0x07 => self.regs.a(),
+            _ => panic!("Invalid CB register code: 0x{:02X}", reg),
+        }
+    }
+
+    fn write_CB(&mut self, reg: u8, value: u8) {
+        match reg {
+            0x00 => self.regs.set_b(value),
+            0x01 => self.regs.set_c(value),
+            0x02 => self.regs.set_d(value),
+            0x03 => self.regs.set_e(value),
+            0x04 => self.regs.set_h(value),
+            0x05 => self.regs.set_l(value),
+            0x06 => {
+                let addr = self.regs.get_hl();
+                self.bus.write_byte(addr, value);
+            }
+            0x07 => self.regs.set_a(value),
+            _ => panic!("Invalid CB register code: 0x{:02X}", reg),
+        }
+    }
+
+   fn exec_cb(cpu: &mut Cpu, op: u8) {
+        let r = op & 0x07;
+        let group = op >> 6;
+
+        match group {
+            0 => {
+                let sub = (op >> 3) & 0x07;
+                let x = cpu.read_CB( r);
+
+                let (res, carry) = match sub {
+                    0 => { // RLC
+                        let c = (x >> 7) & 1;
+                        ((x << 1) | c, c != 0)
+                    }
+                    1 => { // RRC
+                        let c = x & 1;
+                        ((x >> 1) | (c << 7), c != 0)
+                    }
+                    2 => { // RL
+                        let cin = if cpu.regs.get_carry() { 1 } else { 0 };
+                        let c = (x >> 7) & 1;
+                        ((x << 1) | cin, c != 0)
+                    }
+                    3 => { // RR
+                        let cin = if cpu.regs.get_carry() { 0x80 } else { 0 };
+                        let c = x & 1;
+                        ((x >> 1) | cin, c != 0)
+                    }
+                    4 => { // SLA
+                        let c = (x >> 7) & 1;
+                        (x << 1, c != 0)
+                    }
+                    5 => { // SRA (keep msb)
+                        let c = x & 1;
+                        ((x >> 1) | (x & 0x80), c != 0)
+                    }
+                    6 => { // SWAP
+                        let hi = x >> 4;
+                        let lo = x & 0x0F;
+                        ((lo << 4) | hi, false)
+                    }
+                    7 => { // SRL
+                        let c = x & 1;
+                        (x >> 1, c != 0)
+                    }
+                    _ => (x, false),
+                };
+
+                cpu.write_CB( r, res);
+
+                cpu.regs.set_z(res == 0);
+                cpu.regs.set_n(false);
+                cpu.regs.set_hc(false);
+                cpu.regs.set_carry(carry);
+            }
+
+            1 => {
+                let bit = (op >> 3) & 0x07;
+                let x = cpu.read_CB( r);
+                let zero = (x & (1 << bit)) == 0;
+
+                cpu.regs.set_z(zero);
+                cpu.regs.set_n(false);
+                cpu.regs.set_hc(true);
+            }
+
+            2 => {
+                let bit = (op >> 3) & 0x07;
+                let x = cpu.read_CB( r);
+                let res = x & !(1 << bit);
+                cpu.write_CB( r, res);
+            }
+
+            3 => {
+                let bit = (op >> 3) & 0x07;
+                let x = cpu.read_CB( r);
+                let res = x | (1 << bit);
+                cpu.write_CB( r, res);
+            }
+
+            _ => {}
+        }
+}
+
 }
 
