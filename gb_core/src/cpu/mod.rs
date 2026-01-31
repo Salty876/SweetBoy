@@ -85,9 +85,9 @@ impl Cpu {
 
     // Inturupys helper funcs
     fn pending_mask(&self) -> u8 {
-        let ie = self.bus.read_byte(0xFFFF);
-        let iflag = self.bus.read_byte(0xFF0F);
-        (ie & iflag) & 0x1F
+        let ie = self.bus.read_byte(0xFFFF) & 0x1F;
+        let iflag = self.bus.read_byte(0xFF0F) & 0x1F;
+        ie & iflag
     }
 
     fn highest_priority(mask: u8) -> Option<(u8, u16)> {
@@ -112,30 +112,23 @@ impl Cpu {
 
         
 
-       self.begin_instruction();
-       let start_pc = self.pc;
-       
-       let mut opcode = self.fetch_u8();
-       let prefixed = opcode == 0xCB; 
-       
-       if prefixed {
+      self.begin_instruction();
+
+    let mut opcode = self.fetch_u8();
+    let prefixed = opcode == 0xCB;
+    if prefixed {
         opcode = self.fetch_u8();
-        }
-        
-        let instr = Instruction::decode(opcode, prefixed)
+    }
+
+    let instr = Instruction::decode(opcode, prefixed)
         .unwrap_or_else(|| panic!("Unknown opcode: 0x{:02X} (prefixed={})", opcode, prefixed));
 
-        let next_pc = execute(self, instr, prefixed);
+    execute(self, instr, prefixed);
 
-        // Only override when execute actually changes control flow.
-        // If it returns the original start pc, keep sequential fetch_pc.
-        if next_pc != self.fetch_pc {
-        self.fetch_pc = next_pc;
-        }
+    self.end_instruction();
 
-self.end_instruction();
        
-        if self.ime_scheduled {
+    if self.ime_scheduled {
             self.ime = true;
             self.ime_scheduled = false;
         }

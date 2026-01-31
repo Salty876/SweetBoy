@@ -13,7 +13,7 @@ impl Bus {
     #[inline]
     pub fn read_byte(&self, addr: u16) -> u8 {
         match addr {
-            0xFF0F => self.i_flag | 0xE0,
+            0xFF0F => self.i_flag,
             0xFFFF => self.ie,
             _ => self.memory[addr as usize]
         }
@@ -25,10 +25,10 @@ impl Bus {
 
         match addr {
         0xFF0F => {
-            self.i_flag = value & 0x1F;
+            self.i_flag = value;
         }
         0xFFFF => {
-            self.ie = value & 0x1F;
+            self.ie = value;
         }
         _ => {
             self.memory[addr as usize] = value;

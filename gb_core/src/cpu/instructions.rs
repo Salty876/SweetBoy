@@ -60,10 +60,10 @@ pub enum Instruction {
     OR(ArithmeticTarget),
     CALL(JumpTest),
     RET(JumpTest),
-    RLCA(ArithmeticTarget),
-    RLA(ArithmeticTarget),
-    RRCA(ArithmeticTarget),
-    RRA(ArithmeticTarget),
+    RLCA,
+    RLA,
+    RRCA,
+    RRA,
     CPL,
     SCF,
     CCF,
@@ -334,10 +334,10 @@ impl Instruction {
             0x27 => Some(Self::DAA),
 
             // RLCA / RLA / RRCA / RRA
-            0x07 => Some(Self::RLCA(ArithmeticTarget::A)),
-            0x17 => Some(Self::RLA(ArithmeticTarget::A)),
-            0x0F => Some(Self::RRCA(ArithmeticTarget::A)),
-            0x1F => Some(Self::RRA(ArithmeticTarget::A)),
+            0x07 => Some(Self::RLCA),
+            0x17 => Some(Self::RLA),
+            0x0F => Some(Self::RRCA),
+            0x1F => Some(Self::RRA),
 
             _ => None,
         }
