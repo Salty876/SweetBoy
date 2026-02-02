@@ -1,7 +1,4 @@
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-   0.077976292s  INFO prepare_target{force=false package_id=gb_core v0.1.0 (/Users/salabdoulaye/LebronBoy/gb_core) target="cpu_ldh"}: cargo::core::compiler::fingerprint: fingerprint dirty for gb_core v0.1.0 (/Users/salabdoulaye/LebronBoy/gb_core)/Check { test: true }/TargetInner { kind: "test", name: "cpu_ldh", benched: false, ..: with_path("/Users/salabdoulaye/LebronBoy/gb_core/tests/cpu_ldh.rs", Edition2024) }
-   0.077987292s  INFO prepare_target{force=false package_id=gb_core v0.1.0 (/Users/salabdoulaye/LebronBoy/gb_core) target="cpu_ldh"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(Stale)
-    Checking gb_core v0.1.0 (/Users/salabdoulaye/LebronBoy/gb_core)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.48s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.35s

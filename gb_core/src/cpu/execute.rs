@@ -1,8 +1,3 @@
-use core::task;
-use std::result;
-
-use crate::cpu;
-
 use super::{Cpu};
 use super::instructions::*;
 
@@ -575,6 +570,16 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
         Instruction::DI => {
             cpu.ime = false;
             cpu.ime_scheduled = false;
+        },
+
+        Instruction::STOP => {
+            cpu.stopped = true;
+        },
+
+        Instruction::RETI => {
+            let addr = cpu.pop_word();
+            cpu.fetch_pc = addr;
+            cpu.ime = true;
         }
 
 

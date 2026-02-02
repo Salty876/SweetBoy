@@ -82,6 +82,9 @@ pub enum Instruction {
     HALT,
     EI,
     DI,
+    STOP,
+    RETI,
+
 }
 
 impl Instruction {
@@ -370,6 +373,10 @@ impl Instruction {
             // EI / DI
             0xFB => Some(Instruction::EI),
             0xF3 => Some(Instruction::DI),
+
+            // Stop / RETI
+            0x10 => Some(Instruction::STOP),
+            0xD9 => Some(Instruction::RETI),
 
             _ => None,
         }

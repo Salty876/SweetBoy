@@ -22,7 +22,8 @@ pub struct Cpu {
 
     pub fetch_pc: u16,
     pub fetch_pc_valid: bool,
-    pub halt_bug: bool
+    pub halt_bug: bool,
+    pub stopped: bool
 }
 
 impl Cpu {
@@ -41,6 +42,7 @@ impl Cpu {
             fetch_pc: 0,
             fetch_pc_valid: false,
             halt_bug: false,
+            stopped: false
 
         }
     }
@@ -103,6 +105,11 @@ impl Cpu {
 
 
     pub fn step(&mut self) {
+
+        if (self.stopped) {
+            return;
+        }
+
         let pending = self.pending_mask();
         
         if self.halted && pending != 0 {
