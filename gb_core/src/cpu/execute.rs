@@ -354,6 +354,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                         LoadByteSource::L => cpu.regs.l(),
                         LoadByteSource::HLI => cpu.bus.read_byte(cpu.regs.get_hl()),
                         LoadByteSource::D8 => cpu.next_byte(),
+                        
                     };
 
                     match target {
@@ -366,6 +367,15 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                         LoadByteTarget::L => cpu.regs.set_l(v),
                         LoadByteTarget::HLI => cpu.bus.write_byte(cpu.regs.get_hl(), v),
                     };
+                    
+                    let pair = (source, target);
+
+                    match pair {
+                        (_, LoadByteTarget::HLI) => {8},
+                        (LoadByteSource::HLI, _) => {8},
+                        (LoadByteSource::D8, _) => {8},
+                        (_, _) => {4}
+                    }
                 }
 
                 LoadType::D16toR16(target) => {
@@ -377,6 +387,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                         BigLoadByteTarget::HL => cpu.regs.set_hl(v),
                         BigLoadByteTarget::SP => cpu.sp = v,
                     };
+                    16
                 }
 
                 LoadType::HLtoSP => {
@@ -420,6 +431,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let a = cpu.regs.a();
                     cpu.bus.write_byte(addr, a);
                     cpu.regs.set_hl(addr.wrapping_add(1));
+                    12
                 }
 
                 LoadType::AfromHLI => {
@@ -427,6 +439,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let v = cpu.bus.read_byte(addr);
                     cpu.regs.set_a(v);
                     cpu.regs.set_hl(addr.wrapping_add(1));
+                    12
                 }
 
                 LoadType::HLDfromA => {
