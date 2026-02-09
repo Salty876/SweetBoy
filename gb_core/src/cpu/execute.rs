@@ -447,6 +447,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let a = cpu.regs.a();
                     cpu.bus.write_byte(addr, a);
                     cpu.regs.set_hl(addr.wrapping_sub(1));
+                    8
                 }
 
                 LoadType::AfromHLD => {
@@ -454,6 +455,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let v = cpu.bus.read_byte(addr);
                     cpu.regs.set_a(v);
                     cpu.regs.set_hl(addr.wrapping_sub(1));
+                    8
                 }
 
                 LoadType::A16fromA => {
