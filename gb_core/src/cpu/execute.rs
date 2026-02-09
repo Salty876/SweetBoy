@@ -151,6 +151,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             };
             let new_val = cpu.add_hl_rr(value);
             cpu.regs.set_hl(new_val);
+            8
         }
 
         Instruction::SUB(target) => {
@@ -327,6 +328,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                 Add16Target::HL => cpu.regs.set_hl(cpu.regs.get_hl().wrapping_add(1)),
                 Add16Target::SP => cpu.sp = cpu.sp.wrapping_add(1),
             }
+            8
         }
 
         Instruction::DEC16(target) => {
@@ -336,6 +338,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                 Add16Target::HL => cpu.regs.set_hl(cpu.regs.get_hl().wrapping_sub(1)),
                 Add16Target::SP => cpu.sp = cpu.sp.wrapping_sub(1),
             }
+            8
         }
 
         Instruction::LD(load_type) => {
@@ -492,6 +495,11 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(false);
+
+            match target {
+                ArithmeticTarget::HLI => {8}
+                _ => {4}
+            }
         }
 
         Instruction::CP(target) => {
@@ -503,6 +511,11 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(true);
             cpu.regs.set_hc((a & 0x0F) < (v & 0x0F));
             cpu.regs.set_carry(a < v);
+
+            match target {
+                ArithmeticTarget::HLI => {8}
+                _ => {4}
+            }
         }
 
         Instruction::AND(target) => {
@@ -513,6 +526,11 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(true);
             cpu.regs.set_carry(false);
+
+            match target {
+                ArithmeticTarget::HLI => {8}
+                _ => {4}
+            }
         }
 
         Instruction::OR(target) => {
@@ -523,18 +541,25 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(false);
+
+            match target {
+                ArithmeticTarget::HLI => {8}
+                _ => {4}
+            }
         }
 
         Instruction::CPL => {
             cpu.regs.set_a(!cpu.regs.a());
             cpu.regs.set_n(true);
             cpu.regs.set_hc(true);
+            4
         }
 
         Instruction::SCF => {
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(true);
+            4
         }
 
         Instruction::CCF => {
@@ -542,10 +567,12 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(!c);
+            4
         }
 
         Instruction::DAA => {
             daa(cpu);
+            4
         },
 
         Instruction::RLCA => {
@@ -558,6 +585,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(carry != 0);
+            4
 }
 
         Instruction::RRCA => {
@@ -570,6 +598,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(carry != 0);
+            4
         },
 
         Instruction::RLA => {
@@ -583,6 +612,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(carry != 0);
+            4
         },
 
         Instruction::RRA => {
@@ -596,7 +626,8 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_n(false);
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(carry != 0);
-        },
+            4
+        }
 
         Instruction::EI => {
             cpu.ime_scheduled = true;
@@ -622,7 +653,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             16
         }
 
-
+        _ => {4}
 
 
     }
