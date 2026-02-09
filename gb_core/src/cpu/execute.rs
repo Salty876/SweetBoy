@@ -56,10 +56,11 @@ fn daa(cpu: &mut Cpu) {
 
 
 
-pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
+pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
     match instr {
         Instruction::NOP => {
             // do nothing, fetch_pc already advanced by opcode fetch
+            4
         }
 
         Instruction::HALT => {
@@ -71,6 +72,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
             } else {
                 cpu.halted = true;
             }
+            4
             // do not touch pc or fetch_pc
         }
 
@@ -112,6 +114,12 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
             let value = read_u8_target(cpu, target);
             let new_value = cpu.add(value);
             cpu.regs.set_a(new_value);
+
+            match target {
+                ArithmeticTarget::HLI => {8},
+                ArithmeticTarget::D8 => {8},
+                _ => {4}
+            }
         }
 
         Instruction::ADC(target) => {
@@ -126,6 +134,12 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
             cpu.regs.set_n(false);
             cpu.regs.set_hc(((a & 0x0F) + (value & 0x0F) + carry) > 0x0F);
             cpu.regs.set_carry((a as u16) + (value as u16) + (carry as u16) > 0xFF);
+
+            match target {
+                ArithmeticTarget::HLI => {8},
+                ArithmeticTarget::D8 => {8},
+                _ => {4}
+            }
         }
 
         Instruction::ADD16(target) => {
@@ -143,6 +157,12 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
             let value = read_u8_target(cpu, target);
             let new_value = cpu.sub(value);
             cpu.regs.set_a(new_value);
+
+            match target {
+                ArithmeticTarget::HLI => {8},
+                ArithmeticTarget::D8 => {8},
+                _ => {4}
+            }
         }
 
         Instruction::SBC(target) => {
@@ -157,6 +177,12 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
             cpu.regs.set_n(true);
             cpu.regs.set_hc((a & 0x0F) < ((value & 0x0F) + carry));
             cpu.regs.set_carry((a as u16) < (value as u16) + (carry as u16));
+
+            match target {
+                ArithmeticTarget::HLI => {8},
+                ArithmeticTarget::D8 => {8},
+                _ => {4}
+            }
         }
 
         Instruction::INC(target) => {
@@ -168,6 +194,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
                 }
                 ArithmeticTarget::C => {
                     let v = cpu.regs.c();
@@ -176,6 +203,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
                 }
                 ArithmeticTarget::D => {
                     let v = cpu.regs.d();
@@ -184,6 +212,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
                 }
                 ArithmeticTarget::E => {
                     let v = cpu.regs.e();
@@ -192,6 +221,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
                 }
                 ArithmeticTarget::H => {
                     let v = cpu.regs.h();
@@ -200,6 +230,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
                 }
                 ArithmeticTarget::L => {
                     let v = cpu.regs.l();
@@ -208,6 +239,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
                 }
                 ArithmeticTarget::HLI => {
                     let addr = cpu.regs.get_hl();
@@ -217,8 +249,11 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    8
                 }
-                _ => {}
+                _ => {4}
+
+                
             }
         }
 
@@ -565,25 +600,30 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) {
 
         Instruction::EI => {
             cpu.ime_scheduled = true;
+            4
         }
 
         Instruction::DI => {
             cpu.ime = false;
             cpu.ime_scheduled = false;
+            4
         },
 
         Instruction::STOP => {
+            cpu.next_byte();
             cpu.stopped = true;
+            4
         },
 
         Instruction::RETI => {
             let addr = cpu.pop_word();
             cpu.fetch_pc = addr;
             cpu.ime = true;
+            16
         }
 
 
 
-        _ => {}
+
     }
 }

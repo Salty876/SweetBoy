@@ -13,6 +13,7 @@ pub struct Cpu {
     pub regs: Registers,
     pub pc: u16,
     pub sp: u16,
+    pub cycles: u64,
     pub bus: Bus,
     pub halted: bool,
 
@@ -32,6 +33,7 @@ impl Cpu {
             regs: Registers::new(),
             pc: 0x0000,
             sp: 0xFFFE,
+            cycles: 0,
             bus: Bus::new(),
             halted: false,
 
@@ -106,7 +108,7 @@ impl Cpu {
 
     pub fn step(&mut self) {
 
-        if (self.stopped) {
+        if self.stopped  || self.halted {
             return;
         }
 
@@ -115,9 +117,7 @@ impl Cpu {
         if self.halted && pending != 0 {
             self.halted = false;
         }
-        if self.halted {
-            return;
-        }
+
 
         if self.service_interrupts() {
             return;
@@ -205,12 +205,17 @@ impl Cpu {
 
                 // Disable IME
                 self.ime = false;
+                self.ime_scheduled = false;
+                self.halted = false;
 
                 // Push PC to stack
                 self.push_word(self.pc);
 
                 // Jump to interrupt vector
                 self.pc = addr;
+
+                self.fetch_pc = self.pc;
+                self.fetch_pc_valid = false;
 
                 return true;
             }
