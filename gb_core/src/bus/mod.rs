@@ -24,6 +24,20 @@ impl Bus {
     pub fn write_byte(&mut self, addr: u16, value: u8) {
 
         match addr {
+        0xFF02 => {
+            // Serial output: write to 0xFF01, then 0xFF02 with 0x81 to print the character in 0xFF01.
+            // For testing, we can just print to console.
+            if value == 0x81 {
+                let char_to_print = self.read_byte(0xFF01) as char;
+                print!("{}", char_to_print);
+            }
+        }
+
+        0xFF01 => {
+            // Serial data register: just store the value, no actual serial emulation needed for tests.
+            self.memory[0xFF01] = value;
+        }
+        
         0xFF0F => {
             self.i_flag = value;
         }

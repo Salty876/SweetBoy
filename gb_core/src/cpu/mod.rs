@@ -24,14 +24,16 @@ pub struct Cpu {
     pub fetch_pc: u16,
     pub fetch_pc_valid: bool,
     pub halt_bug: bool,
-    pub stopped: bool
+    pub stopped: bool,
+
+    pub last_cycle_timestamp: u8,
 }
 
 impl Cpu {
     pub fn new() -> Self {
         Self {
             regs: Registers::new(),
-            pc: 0x0000,
+            pc: 0x0100,
             sp: 0xFFFE,
             cycles: 0,
             bus: Bus::new(),
@@ -44,7 +46,8 @@ impl Cpu {
             fetch_pc: 0,
             fetch_pc_valid: false,
             halt_bug: false,
-            stopped: false
+            stopped: false,
+            last_cycle_timestamp: 0,
 
         }
     }
