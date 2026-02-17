@@ -4,4 +4,5 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-gb_core = {path = "../gb_core"}
+gb_core = { path = "../gb_core" }
+minifb = "0.27"

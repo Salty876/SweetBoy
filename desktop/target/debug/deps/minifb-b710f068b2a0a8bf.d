@@ -1,0 +1,12 @@
+C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\deps\minifb-b710f068b2a0a8bf.d: C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\lib.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\error.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\icon.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\key.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\key_handler.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\os\mod.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\os\windows\mod.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\rate.rs
+
+C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\deps\libminifb-b710f068b2a0a8bf.rmeta: C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\lib.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\error.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\icon.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\key.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\key_handler.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\os\mod.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\os\windows\mod.rs C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\rate.rs
+
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\lib.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\error.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\icon.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\key.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\key_handler.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\os\mod.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\os\windows\mod.rs:
+C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\minifb-0.27.0\src\rate.rs:

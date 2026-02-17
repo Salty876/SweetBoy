@@ -18,6 +18,12 @@ pub struct Bus {
     /// When TIMA overflows it is reloaded *one M-cycle later*;
     /// this counts down the 4 T-cycle delay (0 = no pending reload).
     tima_reload_countdown: u8,
+
+    // ── Joypad ──
+    /// Button keys state (A, B, Select, Start) — bits 0–3, active low (0 = pressed)
+    pub joypad_action: u8,
+    /// D-pad state (Right, Left, Up, Down) — bits 0–3, active low (0 = pressed)
+    pub joypad_direction: u8,
 }
 
 impl Bus {
@@ -32,12 +38,21 @@ impl Bus {
             tac: 0,
             prev_and: false,
             tima_reload_countdown: 0,
+            joypad_action: 0x0F,
+            joypad_direction: 0x0F,
         }
     }
 
     #[inline]
     pub fn read_byte(&self, addr: u16) -> u8 {
         match addr {
+            0xFF00 => {
+                let select = self.memory[0xFF00];
+                let mut result = 0xCF | (select & 0x30); // bits 6-7 high, lower 4 high
+                if select & 0x20 == 0 { result &= 0xF0 | self.joypad_action; }
+                if select & 0x10 == 0 { result &= 0xF0 | self.joypad_direction; }
+                result
+            }
             0xFF04 => (self.div_counter >> 8) as u8,  // DIV
             0xFF05 => self.tima,                       // TIMA
             0xFF06 => self.tma,                        // TMA
@@ -46,13 +61,16 @@ impl Bus {
             0xFFFF => self.ie,
             _ => self.memory[addr as usize]
         }
-        
     }
 
     #[inline]
     pub fn write_byte(&mut self, addr: u16, value: u8) {
 
         match addr {
+        0xFF00 => {
+            // Only bits 4-5 (select lines) are writable
+            self.memory[0xFF00] = value & 0x30;
+        }
         0xFF02 => {
             // Serial output: write to 0xFF01, then 0xFF02 with 0x81 to print the character in 0xFF01.
             if value == 0x81 {
