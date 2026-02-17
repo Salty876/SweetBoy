@@ -91,13 +91,25 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
         Instruction::JR(test) => {
             let cond = condition(test, cpu);
             let off = cpu.next_byte() as i8;
+
+            let pc0 = cpu.pc;
+            let imm = cpu.bus.read_byte(pc0.wrapping_add(1));
+            let offs = imm as i8;
+            let pc2 = pc0.wrapping_add(2);
+            let dest = ((pc2 as i32) + (off as i32)) as u16;
+     
             if cond {
-                cpu.fetch_pc = cpu.fetch_pc.wrapping_add(off as u16);
+                cpu.fetch_pc = cpu.fetch_pc.wrapping_add((off as i16) as u16);
                 12
             }
             else {
                 8
             }
+        }
+
+        Instruction::JP_HL => {
+            cpu.fetch_pc = cpu.regs.get_hl();
+            4
         }
 
         Instruction::CALL(test) => {
@@ -187,12 +199,12 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             let a = cpu.regs.a();
 
             let result = a.wrapping_sub(value).wrapping_sub(carry);
-            cpu.regs.set_a(result);
 
             cpu.regs.set_z(result == 0);
             cpu.regs.set_n(true);
             cpu.regs.set_hc((a & 0x0F) < ((value & 0x0F) + carry));
-            cpu.regs.set_carry((a as u16) < (value as u16) + (carry as u16));
+            cpu.regs.set_carry((a as u16) < ((value as u16) + (carry as u16)));
+            cpu.regs.set_a(result);
 
             match target {
                 ArithmeticTarget::HLI => {8},
@@ -203,6 +215,15 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
 
         Instruction::INC(target) => {
             match target {
+                ArithmeticTarget::A => {
+                    let v = cpu.regs.a();
+                    let nv = v.wrapping_add(1);
+                    cpu.regs.set_a(nv);
+                    cpu.regs.set_z(nv == 0);
+                    cpu.regs.set_n(false);
+                    cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
+                    4
+                }
                 ArithmeticTarget::B => {
                     let v = cpu.regs.b();
                     let nv = v.wrapping_add(1);
@@ -275,6 +296,15 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
 
         Instruction::DEC(target) => {
             match target {
+                ArithmeticTarget::A => {
+                    let v = cpu.regs.a();
+                    let nv = v.wrapping_sub(1);
+                    cpu.regs.set_a(nv);
+                    cpu.regs.set_z(nv == 0);
+                    cpu.regs.set_n(true);
+                    cpu.regs.set_hc((v & 0x0F) == 0);
+                    4
+                }
                 ArithmeticTarget::B => {
                     let v = cpu.regs.b();
                     let nv = v.wrapping_sub(1);
@@ -529,6 +559,19 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     cpu.regs.set_a(v);
                     16
                 }
+                LoadType::DEfromA => {
+                    let addr = cpu.regs.get_de();
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                    8
+                }
+
+                LoadType::AfromDE => {
+                    let addr = cpu.regs.get_de();
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                    8
+                }
 
                 _ => {4}
             }
@@ -674,6 +717,36 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_hc(false);
             cpu.regs.set_carry(carry != 0);
             4
+        }
+
+        Instruction::PUSH(target) => {
+            let value = match target {
+                StackTargets::AF => cpu.regs.get_af(),
+                StackTargets::BC => cpu.regs.get_bc(),
+                StackTargets::DE => cpu.regs.get_de(),
+                StackTargets::HL => cpu.regs.get_hl(),
+
+            };
+
+            cpu.push_word(value);
+            16
+        }
+
+        Instruction::POP(target) => {
+            let mut value = cpu.pop_word();
+
+            if let StackTargets::AF = target {
+                value &= 0xFFF0;
+            }
+
+            match target {
+                 StackTargets::AF => cpu.regs.set_af(value),
+                StackTargets::BC => cpu.regs.set_bc(value),
+                StackTargets::DE => cpu.regs.set_de(value),
+                StackTargets::HL => cpu.regs.set_hl(value),
+            }
+
+            12
         }
 
         Instruction::EI => {

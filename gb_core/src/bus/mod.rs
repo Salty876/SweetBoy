@@ -28,8 +28,12 @@ impl Bus {
             // Serial output: write to 0xFF01, then 0xFF02 with 0x81 to print the character in 0xFF01.
             // For testing, we can just print to console.
             if value == 0x81 {
-                let char_to_print = self.read_byte(0xFF01) as char;
+                let char_byte = self.read_byte(0xFF01);
+                let char_to_print = char_byte as char;
                 print!("{}", char_to_print);
+                use std::io::Write;
+                std::io::stdout().flush().ok();
+                self.memory[0xFF02] = 0x00;
             }
         }
 

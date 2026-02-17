@@ -1,3 +1,4 @@
+use core::borrow;
 use std::io::StderrLock;
 
 use crate::{bus::Bus, cpu::{self, execute::execute}};
@@ -111,14 +112,14 @@ impl Cpu {
 
     pub fn step(&mut self) {
 
-        if self.stopped  || self.halted {
-            return;
-        }
-
         let pending = self.pending_mask();
-        
+
         if self.halted && pending != 0 {
             self.halted = false;
+        }
+
+        if self.stopped || self.halted {
+            return;
         }
 
 
@@ -130,7 +131,7 @@ impl Cpu {
 
         self.begin_instruction();
 
-        let mut opcode = self.fetch_u8();
+        let opcode = self.fetch_u8();
         
         // prefixed instruction
 
@@ -142,8 +143,9 @@ impl Cpu {
         }
 
         let instr = Instruction::decode(opcode, false)
-            .unwrap();
-        execute(self, instr, false);
+            .unwrap_or_else(|| panic!("Unknown opcode: 0x{:02X} (prefixed={}) PC={:04X}", opcode, false, self.pc));
+        let cycles = execute(self, instr, false);
+        self.last_cycle_timestamp = cycles;
 
         let was_ei = matches!(instr, Instruction::EI);
 
@@ -259,16 +261,17 @@ impl Cpu {
     }
 
     pub fn sub(&mut self, value: u8) -> u8{
+        let a  = self.regs.a();
 
-        let (new_value, did_overflow) = self.regs.a_reg.overflowing_sub(value);
+        let (new_value, borrow) = a.overflowing_sub(value);
         // self.registers.f_reg.z_flag = new_value == 0;
         // self.registers.f_reg.n_flag = true;
         // self.registers.f_reg.c_flag = did_overflow;
         // self.registers.f_reg.h_flag = (self.registers.a_reg & 0xF) < (value & 0xF);
         self.regs.set_z(new_value == 0);
         self.regs.set_n(true);
-        self.regs.set_carry(did_overflow);
-        self.regs.set_hc((self.regs.a_reg & 0xF) < (value & 0xF));
+        self.regs.set_carry(borrow);
+        self.regs.set_hc((a & 0xF) < (value & 0xF));
         new_value
     }
 

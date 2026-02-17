@@ -1,0 +1,12 @@
+C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\deps\gb_core-7288875613f9d68a.d: C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\lib.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\bus\mod.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\mod.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\registers.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\instructions.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\execute.rs
+
+C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\deps\libgb_core-7288875613f9d68a.rlib: C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\lib.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\bus\mod.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\mod.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\registers.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\instructions.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\execute.rs
+
+C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\deps\libgb_core-7288875613f9d68a.rmeta: C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\lib.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\bus\mod.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\mod.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\registers.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\instructions.rs C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\execute.rs
+
+C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\lib.rs:
+C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\bus\mod.rs:
+C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\mod.rs:
+C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\registers.rs:
+C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\instructions.rs:
+C:\Users\Saleh\Documents\Programming\ projects\LebronBoy\gb_core\src\cpu\execute.rs:

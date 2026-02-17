@@ -31,6 +31,8 @@ pub enum LoadType {
     HLtoSP,
     SPtoA16,
     R16toSP(BigRegisterTarget),
+    DEfromA,
+    AfromDE,
     SP8toHL,
     HLIfromA,      // LD (HL+),A  0x22
     AfromHLI,      // LD A,(HL+)  0x2A
@@ -60,6 +62,7 @@ pub enum Instruction {
     INC16(Add16Target),
     DEC16(Add16Target),
     JP(JumpTest),
+    JP_HL,
     JR(JumpTest),
     LD(LoadType),
     PUSH(StackTargets),
@@ -89,7 +92,6 @@ pub enum Instruction {
 
 impl Instruction {
     pub fn decode(byte: u8, prefixed: bool) -> Option<Self> {
-        println!("{:02X}", byte);
         if prefixed { Self::decode_cb(byte) } else { Self::decode_base(byte) }
     }
 
@@ -125,6 +127,7 @@ impl Instruction {
             0xCA => Some(Self::JP(JumpTest::Zero)),
             0xD2 => Some(Self::JP(JumpTest::NotCarry)),
             0xDA => Some(Self::JP(JumpTest::Carry)),
+            0xE9 => Some(Self::JP_HL),
 
             // ADD r, r instructions here
             0x80 => Some(Self::ADD(ArithmeticTarget::B)),
@@ -255,6 +258,7 @@ impl Instruction {
             0x36 => Some(Self::LD(LoadType::R8ToR8(LoadByteTarget::HLI, LoadByteSource::D8))),
             0x3E => Some(Self::LD(LoadType::R8ToR8(LoadByteTarget::A, LoadByteSource::D8))),
 
+
             // LD rr, d16
             0x01 => Some(Self::LD(LoadType::D16toR16(BigLoadByteTarget::BC))),
             0x11 => Some(Self::LD(LoadType::D16toR16(BigLoadByteTarget::DE))),
@@ -283,6 +287,8 @@ impl Instruction {
             0xF0 => Some(Self::LD(LoadType::AfromFF00A8)),
             0xE2 => Some(Self::LD(LoadType::FF00CfromA)),
             0xF2 => Some(Self::LD(LoadType::AfromFF00C)),
+            0x12 => Some(Self::LD(LoadType::DEfromA)),
+            0x1A => Some(Self::LD(LoadType::AfromDE)),
 
 
             // JR e8 / JR cc,e8
@@ -371,12 +377,24 @@ impl Instruction {
 
 
             // EI / DI
-            0xFB => Some(Instruction::EI),
-            0xF3 => Some(Instruction::DI),
+            0xFB => Some(Self::EI),
+            0xF3 => Some(Self::DI),
 
             // Stop / RETI
-            0x10 => Some(Instruction::STOP),
-            0xD9 => Some(Instruction::RETI),
+            0x10 => Some(Self::STOP),
+            0xD9 => Some(Self::RETI),
+
+            // PUSH
+        0xC5 => Some(Self::PUSH(StackTargets::BC)),
+        0xD5 => Some(Self::PUSH(StackTargets::DE)),
+        0xE5 => Some(Self::PUSH(StackTargets::HL)),
+        0xF5 => Some(Self::PUSH(StackTargets::AF)),
+
+        // POP
+        0xC1 => Some(Self::POP(StackTargets::BC)),
+        0xD1 => Some(Self::POP(StackTargets::DE)),
+        0xE1 => Some(Self::POP(StackTargets::HL)),
+        0xF1 => Some(Self::POP(StackTargets::AF)),
 
             _ => None,
         }
