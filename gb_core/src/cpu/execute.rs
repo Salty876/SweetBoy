@@ -130,7 +130,8 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             if cond {
                 let addr = cpu.pop_word();
                 cpu.fetch_pc = addr;
-                20
+                // Unconditional RET = 16 T (4 M), conditional taken = 20 T (5 M)
+                if matches!(test, JumpTest::Always) { 16 } else { 20 }
             }
             else {
                 8
@@ -286,7 +287,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(false);
                     cpu.regs.set_hc((v & 0x0F) + 1 > 0x0F);
-                    8
+                    12
                 }
                 _ => {4}
 
@@ -367,7 +368,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     cpu.regs.set_z(nv == 0);
                     cpu.regs.set_n(true);
                     cpu.regs.set_hc((v & 0x0F) == 0);
-                    4
+                    12
                 }
                 _ => {4}
             }
@@ -423,6 +424,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let pair = (source, target);
 
                     match pair {
+                        (LoadByteSource::D8, LoadByteTarget::HLI) => {12},
                         (_, LoadByteTarget::HLI) => {8},
                         (LoadByteSource::HLI, _) => {8},
                         (LoadByteSource::D8, _) => {8},
@@ -452,7 +454,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let sp = cpu.sp;
                     cpu.bus.write_byte(addr, (sp & 0xFF) as u8);
                     cpu.bus.write_byte(addr.wrapping_add(1), (sp >> 8) as u8);
-                    16
+                    20
                 }
 
                 LoadType::R16toSP(source) => {
@@ -487,7 +489,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let a = cpu.regs.a();
                     cpu.bus.write_byte(addr, a);
                     cpu.regs.set_hl(addr.wrapping_add(1));
-                    12
+                    8
                 }
 
                 LoadType::AfromHLI => {
@@ -495,7 +497,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let v = cpu.bus.read_byte(addr);
                     cpu.regs.set_a(v);
                     cpu.regs.set_hl(addr.wrapping_add(1));
-                    12
+                    8
                 }
 
                 LoadType::HLDfromA => {
@@ -533,7 +535,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let addr = 0xFF00u16.wrapping_add(a8);
                     let a = cpu.regs.a();
                     cpu.bus.write_byte(addr, a);
-                    16
+                    12
                 }
 
                 LoadType::AfromFF00A8 => {
@@ -541,7 +543,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let addr = 0xFF00u16.wrapping_add(a8);
                     let v = cpu.bus.read_byte(addr);
                     cpu.regs.set_a(v);
-                    16
+                    12
                 }
 
                 LoadType::FF00CfromA => {
@@ -549,7 +551,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let addr = 0xFF00u16.wrapping_add(c);
                     let a = cpu.regs.a();
                     cpu.bus.write_byte(addr, a);
-                    16
+                    8
                 }
 
                 LoadType::AfromFF00C => {
@@ -557,7 +559,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
                     let addr = 0xFF00u16.wrapping_add(c);
                     let v = cpu.bus.read_byte(addr);
                     cpu.regs.set_a(v);
-                    16
+                    8
                 }
                 LoadType::DEfromA => {
                     let addr = cpu.regs.get_de();
@@ -568,6 +570,20 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
 
                 LoadType::AfromDE => {
                     let addr = cpu.regs.get_de();
+                    let v = cpu.bus.read_byte(addr);
+                    cpu.regs.set_a(v);
+                    8
+                }
+
+                LoadType::BCfromA => {
+                    let addr = cpu.regs.get_bc();
+                    let a = cpu.regs.a();
+                    cpu.bus.write_byte(addr, a);
+                    8
+                }
+
+                LoadType::AfromBC => {
+                    let addr = cpu.regs.get_bc();
                     let v = cpu.bus.read_byte(addr);
                     cpu.regs.set_a(v);
                     8
@@ -587,7 +603,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_carry(false);
 
             match target {
-                ArithmeticTarget::HLI => {8}
+                ArithmeticTarget::HLI | ArithmeticTarget::D8 => {8}
                 _ => {4}
             }
         }
@@ -603,7 +619,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_carry(a < v);
 
             match target {
-                ArithmeticTarget::HLI => {8}
+                ArithmeticTarget::HLI | ArithmeticTarget::D8 => {8}
                 _ => {4}
             }
         }
@@ -618,7 +634,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_carry(false);
 
             match target {
-                ArithmeticTarget::HLI => {8}
+                ArithmeticTarget::HLI | ArithmeticTarget::D8 => {8}
                 _ => {4}
             }
         }
@@ -633,7 +649,7 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             cpu.regs.set_carry(false);
 
             match target {
-                ArithmeticTarget::HLI => {8}
+                ArithmeticTarget::HLI | ArithmeticTarget::D8 => {8}
                 _ => {4}
             }
         }
@@ -770,6 +786,27 @@ pub fn execute(cpu: &mut Cpu, instr: Instruction, prefixed: bool) -> u8{
             let addr = cpu.pop_word();
             cpu.fetch_pc = addr;
             cpu.ime = true;
+            16
+        }
+
+        Instruction::RST(vector) => {
+            let ret = cpu.fetch_pc;
+            cpu.push_word(ret);
+            cpu.fetch_pc = vector as u16;
+            16
+        }
+
+        Instruction::ADD_SP_R8 => {
+            let off = cpu.next_byte() as i8 as i16 as u16;
+            let sp = cpu.sp;
+            let result = sp.wrapping_add(off);
+
+            cpu.regs.set_z(false);
+            cpu.regs.set_n(false);
+            cpu.regs.set_carry(((sp & 0xFF) + (off & 0xFF)) > 0xFF);
+            cpu.regs.set_hc(((sp & 0x0F) + (off & 0x0F)) > 0x0F);
+
+            cpu.sp = result;
             16
         }
 

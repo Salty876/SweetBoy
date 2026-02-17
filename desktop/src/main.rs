@@ -10,7 +10,7 @@ pub fn main() {
     let mut count = 0;
     let mut serial_output = String::new();
 
-    let rom = std::fs::read("../blaarg/cpu_instr/individual/01-special.gb").unwrap();
+    let rom = std::fs::read("../gb-test-roms/cpu_instrs/individual/11-op a,(hl).gb").unwrap();
 
     cpu.regs.set_af(0x01B0);
     cpu.regs.set_bc(0x0013);
@@ -85,15 +85,24 @@ pub fn main() {
             last_pc = cpu.pc;
         }
 
-        if steps % 5_000_000 == 0 {
-        println!("PC={:04X} OP={:02X} A={:02X} F={:02X} SP={:04X}",
+        if steps % 100_000 == 0 {
+        println!("PC={:04X} OP={:02X} A={:02X} F={:02X} SP={:04X} TIMA={:02X} TAC={:02X} IF={:02X} IE={:02X} IME={}",
             cpu.pc,
             cpu.bus.read_byte(cpu.pc),
             cpu.regs.a(),
-            cpu.regs.f(),   // or however you expose flags byte
-            cpu.sp
+            cpu.regs.f(),
+            cpu.sp,
+            cpu.bus.read_byte(0xFF05),
+            cpu.bus.read_byte(0xFF07),
+            cpu.bus.read_byte(0xFF0F),
+            cpu.bus.read_byte(0xFFFF),
+            cpu.ime,
         );
         count += 1;
+        if count > 200 {
+            println!("Timeout after {} steps", steps);
+            break;
+        }
     }
 
 

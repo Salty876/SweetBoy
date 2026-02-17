@@ -33,6 +33,8 @@ pub enum LoadType {
     R16toSP(BigRegisterTarget),
     DEfromA,
     AfromDE,
+    BCfromA,       // LD (BC),A   0x02
+    AfromBC,       // LD A,(BC)   0x0A
     SP8toHL,
     HLIfromA,      // LD (HL+),A  0x22
     AfromHLI,      // LD A,(HL+)  0x2A
@@ -87,6 +89,8 @@ pub enum Instruction {
     DI,
     STOP,
     RETI,
+    RST(u8),
+    ADD_SP_R8,
 
 }
 
@@ -289,6 +293,8 @@ impl Instruction {
             0xF2 => Some(Self::LD(LoadType::AfromFF00C)),
             0x12 => Some(Self::LD(LoadType::DEfromA)),
             0x1A => Some(Self::LD(LoadType::AfromDE)),
+            0x02 => Some(Self::LD(LoadType::BCfromA)),
+            0x0A => Some(Self::LD(LoadType::AfromBC)),
 
 
             // JR e8 / JR cc,e8
@@ -383,6 +389,19 @@ impl Instruction {
             // Stop / RETI
             0x10 => Some(Self::STOP),
             0xD9 => Some(Self::RETI),
+
+            // RST
+            0xC7 => Some(Self::RST(0x00)),
+            0xCF => Some(Self::RST(0x08)),
+            0xD7 => Some(Self::RST(0x10)),
+            0xDF => Some(Self::RST(0x18)),
+            0xE7 => Some(Self::RST(0x20)),
+            0xEF => Some(Self::RST(0x28)),
+            0xF7 => Some(Self::RST(0x30)),
+            0xFF => Some(Self::RST(0x38)),
+
+            // ADD SP, r8
+            0xE8 => Some(Self::ADD_SP_R8),
 
             // PUSH
         0xC5 => Some(Self::PUSH(StackTargets::BC)),

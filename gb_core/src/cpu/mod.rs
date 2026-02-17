@@ -119,11 +119,15 @@ impl Cpu {
         }
 
         if self.stopped || self.halted {
+            // Even while halted/stopped, timer ticks 4 T-cycles (1 M-cycle)
+            self.tick_timer(4);
             return;
         }
 
 
         if self.service_interrupts() {
+            // Interrupt dispatch takes 20 T-cycles (5 M-cycles)
+            self.tick_timer(20);
             return;
             }
 
@@ -138,6 +142,15 @@ impl Cpu {
         if opcode == 0xCB {
             let cb_opcode = self.fetch_u8();
             Self::exec_cb(self, cb_opcode);
+            // CB instructions: 8 T-cycles, or 16 for (HL) variants
+            let cb_cycles: u8 = if (cb_opcode & 0x07) == 0x06 {
+                // BIT n,(HL) is 12 cycles; other (HL) ops are 16
+                if (cb_opcode >> 6) == 1 { 12 } else { 16 }
+            } else {
+                8
+            };
+            self.last_cycle_timestamp = cb_cycles;
+            self.tick_timer(cb_cycles as u32);
             self.end_instruction();
             return;
         }
@@ -146,6 +159,7 @@ impl Cpu {
             .unwrap_or_else(|| panic!("Unknown opcode: 0x{:02X} (prefixed={}) PC={:04X}", opcode, false, self.pc));
         let cycles = execute(self, instr, false);
         self.last_cycle_timestamp = cycles;
+        self.tick_timer(cycles as u32);
 
         let was_ei = matches!(instr, Instruction::EI);
 
@@ -196,6 +210,13 @@ impl Cpu {
     pub fn run_steps(&mut self, steps: usize) {
         for _ in 0..steps {
             self.step();
+        }
+    }
+
+    /// Advance the internal timer by `t_cycles` T-cycles.
+    fn tick_timer(&mut self, t_cycles: u32) {
+        for _ in 0..t_cycles {
+            self.bus.tick_timer();
         }
     }
 
