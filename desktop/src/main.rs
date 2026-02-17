@@ -10,7 +10,7 @@ pub fn main() {
     let mut count = 0;
     let mut serial_output = String::new();
 
-    let rom = std::fs::read("../gb-test-roms/cpu_instrs/individual/11-op a,(hl).gb").unwrap();
+    let rom = std::fs::read("../gb-test-roms/instr_timing/instr_timing.gb").unwrap();
 
     cpu.regs.set_af(0x01B0);
     cpu.regs.set_bc(0x0013);
