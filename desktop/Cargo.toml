@@ -5,3 +5,4 @@ edition = "2024"
 
 [dependencies]
 gb_core = { path = "../gb_core" }
+sdl2 = { version = "0.38", features = ["bundled"] }

@@ -1,0 +1,17 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\CMakeFiles\cffab474728977aba4499c2cdfd2f071\uninstall.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\Saleh\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\sdl2-sys-0.38.0\SDL\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\CMakeFiles\uninstall" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2D58484D-F1F0-3589-ABF1-8819093C9718}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
