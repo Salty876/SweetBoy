@@ -201,8 +201,8 @@ CMAKE = None
 -- 
 -- Performing Test CHECK_CPU_ARCHITECTURE_X86
 -- Performing Test CHECK_CPU_ARCHITECTURE_X86 - Failed
--- Configuring done (16.2s)
--- Generating done (0.1s)
+-- Configuring done (21.5s)
+-- Generating done (0.2s)
 -- Build files have been written to: C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build
 MSBuild version 17.14.19+164abd434 for .NET Framework
 
@@ -288,8 +288,10 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   Building Custom Rule C:/Users/Saleh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-sys-0.38.0/SDL/CMakeLists.txt
   Building Custom Rule C:/Users/Saleh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-sys-0.38.0/SDL/CMakeLists.txt
   Building Custom Rule C:/Users/Saleh/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-sys-0.38.0/SDL/CMakeLists.txt
-  SDL_windows_main.c
   SDL_test_assert.c
+  SDL_windows_main.c
+  SDL_test_common.c
+  SDL_test_compare.c
   SDL.c
   SDL_assert.c
   SDL_dataqueue.c
@@ -301,11 +303,12 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   SDL_utils.c
   SDL_atomic.c
   SDL_spinlock.c
+  SDL_test_crc32.c
   SDL_audio.c
-  SDL_test_common.c
   SDL_audiocvt.c
   SDL_audiodev.c
   SDL_audiotypecvt.c
+  SDL_test_font.c
   SDL_mixer.c
   SDL_wave.c
   SDL_cpuinfo.c
@@ -313,31 +316,30 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   SDL_clipboardevents.c
   SDL_displayevents.c
   SDL_dropevents.c
-  SDL_test_compare.c
   SDL_events.c
   SDL_gesture.c
   SDL_keyboard.c
   SDL_keysym_to_scancode.c
-  SDL_test_crc32.c
   SDL_mouse.c
+  SDL_test_fuzzer.c
   SDL_quit.c
   SDL_scancode_tables.c
   SDL_touch.c
+  SDL_test_harness.c
   SDL_windowevents.c
   imKStoUCS.c
-  SDL_test_font.c
   SDL_rwops.c
   SDL_haptic.c
   SDL_hidapi.c
+  SDL_test_imageBlit.c
   SDL_gamecontroller.c
   SDL_joystick.c
   controller_type.c
   e_atan2.c
   e_exp.c
-  SDL_test_fuzzer.c
   e_fmod.c
+  SDL_test_imageBlitBlend.c
   e_log.c
-  SDL2main.vcxproj -> C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\Release\SDL2main.lib
   e_log10.c
   e_pow.c
   e_rem_pio2.c
@@ -345,10 +347,10 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   k_cos.c
   k_rem_pio2.c
   k_sin.c
-  SDL_test_harness.c
   k_tan.c
   s_atan.c
   s_copysign.c
+  SDL_test_imageFace.c
   s_cos.c
   s_fabs.c
   s_floor.c
@@ -357,30 +359,35 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   s_tan.c
   SDL_locale.c
   SDL_url.c
+  SDL_test_imagePrimitives.c
   SDL_power.c
-  SDL_test_imageBlit.c
   SDL_d3dmath.c
   SDL_render.c
+  SDL_test_imagePrimitivesBlend.c
   SDL_yuv_sw.c
   SDL_render_d3d.c
   SDL_shaders_d3d.c
   SDL_render_d3d11.c
   SDL_shaders_d3d11.c
   SDL_render_d3d12.c
+  SDL_test_log.c
+  SDL2main.vcxproj -> C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\Release\SDL2main.lib
   SDL_shaders_d3d12.c
-  SDL_test_imageBlitBlend.c
   SDL_render_gl.c
   SDL_shaders_gl.c
   SDL_render_gles.c
   SDL_render_gles2.c
   SDL_shaders_gles2.c
+  SDL_test_md5.c
   SDL_render_ps2.c
   SDL_render_psp.c
   SDL_blendfillrect.c
   SDL_blendline.c
   SDL_blendpoint.c
+  SDL_test_memory.c
   SDL_drawline.c
   SDL_drawpoint.c
+  SDL_test_random.c
   SDL_render_sw.c
   SDL_rotate.c
   SDL_triangle.c
@@ -400,7 +407,6 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   SDL_thread.c
   SDL_timer.c
   SDL_RLEaccel.c
-  SDL_test_imageFace.c
   SDL_blit.c
   SDL_blit_0.c
   SDL_blit_1.c
@@ -414,7 +420,6 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   SDL_egl.c
   SDL_fillrect.c
   SDL_pixels.c
-  SDL_test_imagePrimitives.c
   SDL_rect.c
   SDL_shape.c
   SDL_stretch.c
@@ -425,12 +430,10 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   yuv_rgb.c
   SDL_dummyaudio.c
   SDL_diskaudio.c
-  SDL_test_imagePrimitivesBlend.c
   SDL_virtualjoystick.c
   SDL_nullevents.c
   SDL_nullframebuffer.c
   SDL_nullvideo.c
-  SDL_test_log.c
   SDL_offscreenevents.c
   SDL_offscreenframebuffer.c
   SDL_offscreenopengles.c
@@ -439,20 +442,17 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   SDL_hid.c
   SDL_immdevice.c
   SDL_windows.c
-  SDL_test_md5.c
   SDL_xinput.c
   SDL_sysurl.c
   SDL_winmm.c
-  SDL_test_memory.c
   SDL_directsound.c
   SDL_wasapi.c
   SDL_wasapi_win32.c
-  SDL_test_random.c
   SDL_windowsclipboard.c
   SDL_windowsevents.c
   SDL_windowsframebuffer.c
-  SDL_windowskeyboard.c
   Generating Code...
+  SDL_windowskeyboard.c
   SDL_windowsmessagebox.c
   SDL_windowsmodes.c
   SDL_windowsmouse.c
@@ -497,8 +497,8 @@ MSBuild version 17.14.19+164abd434 for .NET Framework
   SDL_xinputjoystick.c
   SDL_dinputhaptic.c
   SDL_windowshaptic.c
-  SDL2_test.vcxproj -> C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\Release\SDL2_test.lib
   SDL_xinputhaptic.c
+  SDL2_test.vcxproj -> C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\Release\SDL2_test.lib
   SDL_mslibc.c
      Creating library C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/Release/SDL2.lib and object C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/Release/SDL2.exp
   SDL2.vcxproj -> C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop\target\debug\build\sdl2-sys-e1dede68dacc4fae\out\build\Release\SDL2.dll

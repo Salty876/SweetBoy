@@ -1,7 +1,6 @@
 use sdl2::event::Event;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::PixelFormatEnum;
-use std::time::{Duration, Instant};
 use std::env;
 use std::fs::File;
 use std::io::Read;
@@ -65,11 +64,6 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
     // Temp pixel buffer for upload to SDL texture
     let mut rgba = [0u8; W * H * 4];
 
-    // Optional: if you don't use vsync, you can cap to ~60 FPS.
-    // With vsync on, you can skip manual sleeping.
-    let mut last = Instant::now();
-    let mut frame_count = 0u64;
-
     'running: loop {
         // ---- Input/events ----
         for event in event_pump.poll_iter() {
@@ -91,29 +85,8 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
 
         // ---- Emulation step ----
         // Run until we have a full frame (PPU sets frame_ready at VBlank start).
-        // Limit cycles per iteration to keep window responsive
-        let mut cycles_this_frame = 0u32;
-        const CYCLES_PER_FRAME: u32 = 70224; // ~4.19 MHz / 59.7 fps
-        
-        while !emu.cpu.bus.ppu.frame_ready && cycles_this_frame < CYCLES_PER_FRAME * 2 {
+        while !emu.cpu.bus.ppu.frame_ready {
             emu.step_instruction();
-            cycles_this_frame += emu.cpu.last_cycle_timestamp as u32;
-        }
-
-        // Debug: print every 60 frames
-        frame_count += 1;
-        if frame_count % 60 == 0 {
-            println!("Frame {}: PC={:04X} LY={} LCDC={:02X} frame_ready={}", 
-                frame_count, 
-                emu.cpu.pc, 
-                emu.cpu.bus.ppu.ly,
-                emu.cpu.bus.ppu.lcdc,
-                emu.cpu.bus.ppu.frame_ready);
-            
-            // Debug: print some framebuffer values at different positions
-            let fb = &emu.cpu.bus.ppu.framebuffer;
-            let non_zero: usize = fb.iter().filter(|&&x| x != 0).count();
-            println!("  Non-zero pixels: {} / {} (row 72: {:?})", non_zero, W*H, &fb[(72*W)..(72*W+16)]);
         }
 
         // ---- Render ----
@@ -129,14 +102,7 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
         canvas.copy(&texture, None, None)?;
         canvas.present();
 
-        // Optional manual pacing if you remove present_vsync().
-        // 59.7-ish fps on DMG, but 60 is fine for now.
-        let target = Duration::from_micros(16_667);
-        let elapsed = last.elapsed();
-        if elapsed < target {
-            std::thread::sleep(target - elapsed);
-        }
-        last = Instant::now();
+        // vsync handles frame pacing, no manual sleep needed
     }
 
     Ok(())
