@@ -1,2 +1,4 @@
-Pokemon - Red Version (USA, Europe) (SGB Enhanced).gb
-Tetris (World) (Rev 1).gb
+*.gb
+/target
+/desktop/target
+/gb_core/target

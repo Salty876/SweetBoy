@@ -119,15 +119,15 @@ impl Cpu {
         }
 
         if self.stopped || self.halted {
-            // Even while halted/stopped, timer ticks 4 T-cycles (1 M-cycle)
-            self.tick_timer(4);
+            // Even while halted/stopped, PPU and timer still run (4 T-cycles / 1 M-cycle)
+            self.bus.tick(4);
             return;
         }
 
 
         if self.service_interrupts() {
             // Interrupt dispatch takes 20 T-cycles (5 M-cycles)
-            self.tick_timer(20);
+            self.bus.tick(20);
             return;
             }
 
@@ -150,7 +150,7 @@ impl Cpu {
                 8
             };
             self.last_cycle_timestamp = cb_cycles;
-            self.tick_timer(cb_cycles as u32);
+            self.bus.tick(cb_cycles as u16);
             self.end_instruction();
             return;
         }
@@ -159,7 +159,7 @@ impl Cpu {
             .unwrap_or_else(|| panic!("Unknown opcode: 0x{:02X} (prefixed={}) PC={:04X}", opcode, false, self.pc));
         let cycles = execute(self, instr, false);
         self.last_cycle_timestamp = cycles;
-        self.tick_timer(cycles as u32);
+        self.bus.tick(cycles as u16);
 
         let was_ei = matches!(instr, Instruction::EI);
 
@@ -201,9 +201,7 @@ impl Cpu {
     }
 
     pub fn load_rom(&mut self, rom: &[u8]) {
-        // temporary simple mapping: copy to 0x0000...
-        let len = rom.len().min(0x8000); // ROM0+ROMX basic
-        self.bus.memory[..len].copy_from_slice(&rom[..len]);
+        self.bus.load_rom(rom);
         self.pc = 0x0100; // skip boot (or set 0x0000 if using boot rom)
     }
 

@@ -4,12 +4,14 @@ use sdl2::pixels::PixelFormatEnum;
 use std::env;
 use std::fs::File;
 use std::io::Read;
+use std::time::{Duration, Instant};
 
 use gb_core::Emulator;
 
 const W: usize = 160;
 const H: usize = 144;
 const SCALE: u32 = 4; // 2,3,4,5...
+const FAST_FORWARD_MULTIPLIER: u32 = 8; // Run 8x speed when holding Space
 
 // Map DMG shade index (0..3) -> grayscale byte.
 // 0 is "white", 3 is "black" in many emulators.
@@ -50,7 +52,7 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
     let mut canvas = window
         .into_canvas()
         .accelerated()
-        .present_vsync() // simplest pacing: present at monitor refresh
+        // No vsync - we handle timing manually for fast-forward support
         .build()
         .map_err(|e| e.to_string())?;
 
@@ -63,6 +65,11 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
 
     // Temp pixel buffer for upload to SDL texture
     let mut rgba = [0u8; W * H * 4];
+    
+    // Timing for manual framerate control
+    let frame_duration = Duration::from_nanos(16_742_706); // ~59.7 fps (Game Boy native)
+    let mut last_frame = Instant::now();
+    let mut fast_forward = false;
 
     'running: loop {
         // ---- Input/events ----
@@ -70,6 +77,14 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
             match event {
                 Event::Quit { .. } => break 'running,
                 Event::KeyDown { keycode: Some(Keycode::Escape), .. } => break 'running,
+
+                // Fast-forward with Space
+                Event::KeyDown { keycode: Some(Keycode::Space), repeat: false, .. } => {
+                    fast_forward = true;
+                }
+                Event::KeyUp { keycode: Some(Keycode::Space), repeat: false, .. } => {
+                    fast_forward = false;
+                }
 
                 // Example joypad mapping (active-low bits)
                 Event::KeyDown { keycode: Some(k), repeat: false, .. } => {
@@ -84,14 +99,18 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
         }
 
         // ---- Emulation step ----
-        // Run until we have a full frame (PPU sets frame_ready at VBlank start).
-        while !emu.cpu.bus.ppu.frame_ready {
-            emu.step_instruction();
+        // Run multiple frames when fast-forwarding
+        let frames_to_run = if fast_forward { FAST_FORWARD_MULTIPLIER } else { 1 };
+        
+        for _ in 0..frames_to_run {
+            // Run until we have a full frame (PPU sets frame_ready at VBlank start).
+            while !emu.cpu.bus.ppu.frame_ready {
+                emu.step_instruction();
+            }
+            emu.cpu.bus.ppu.frame_ready = false;
         }
 
         // ---- Render ----
-        emu.cpu.bus.ppu.frame_ready = false;
-
         blit_rgba(&emu.cpu.bus.ppu.framebuffer, &mut rgba);
 
         texture
@@ -102,7 +121,14 @@ pub fn run_sdl(mut emu: Emulator) -> Result<(), String> {
         canvas.copy(&texture, None, None)?;
         canvas.present();
 
-        // vsync handles frame pacing, no manual sleep needed
+        // Manual frame pacing (only when not fast-forwarding)
+        if !fast_forward {
+            let elapsed = last_frame.elapsed();
+            if elapsed < frame_duration {
+                std::thread::sleep(frame_duration - elapsed);
+            }
+        }
+        last_frame = Instant::now();
     }
 
     Ok(())

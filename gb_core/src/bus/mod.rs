@@ -1,6 +1,17 @@
+use crate::ppu::Ppu;
+
+/// Cartridge type / memory bank controller
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum MbcType {
+    None,
+    Mbc1,
+    Mbc3,
+}
+
 #[derive(Clone)]
 pub struct Bus {
     pub memory: [u8; 0x10000],
+    pub ppu: Ppu,
     ie: u8,
     i_flag: u8,
 
@@ -19,11 +30,28 @@ pub struct Bus {
     /// this counts down the 4 T-cycle delay (0 = no pending reload).
     tima_reload_countdown: u8,
 
+    // ── MBC (Memory Bank Controller) ──
+    pub mbc_type: MbcType,
+    /// Full ROM data
+    pub rom: Vec<u8>,
+    /// External RAM (up to 32KB for MBC1)
+    pub eram: Vec<u8>,
+    /// ROM bank register (5 bits for MBC1)
+    rom_bank: u8,
+    /// RAM bank / upper ROM bits register (2 bits)
+    ram_bank: u8,
+    /// Banking mode: false = ROM mode, true = RAM mode
+    banking_mode: bool,
+    /// RAM enabled flag
+    ram_enabled: bool,
+
     // ── Joypad ──
-    /// Button keys state (A, B, Select, Start) — bits 0–3, active low (0 = pressed)
-    pub joypad_action: u8,
-    /// D-pad state (Right, Left, Up, Down) — bits 0–3, active low (0 = pressed)
-    pub joypad_direction: u8,
+    /// Joypad select register (0xFF00 bits 4-5)
+    pub joypad_select: u8,
+    /// Button states: bit0=A, bit1=B, bit2=Select, bit3=Start
+    pub joypad_buttons: u8,
+    /// D-pad states: bit0=Right, bit1=Left, bit2=Up, bit3=Down
+    pub joypad_dpad: u8,
 }
 
 impl Bus {
@@ -38,21 +66,156 @@ impl Bus {
             tac: 0,
             prev_and: false,
             tima_reload_countdown: 0,
-            joypad_action: 0x0F,
-            joypad_direction: 0x0F,
+            ppu: Ppu::new(),
+            // MBC
+            mbc_type: MbcType::None,
+            rom: Vec::new(),
+            eram: vec![0; 0x8000], // 32KB max
+            rom_bank: 1,
+            ram_bank: 0,
+            banking_mode: false,
+            ram_enabled: false,
+            // Joypad (all buttons released = 0x0F)
+            joypad_select: 0x30,
+            joypad_buttons: 0x0F,
+            joypad_dpad: 0x0F,
         }
+    }
+
+    /// Load ROM and detect MBC type from cartridge header
+    pub fn load_rom(&mut self, data: &[u8]) {
+        self.rom = data.to_vec();
+        
+        // Detect MBC type from header byte 0x147
+        let cart_type = if data.len() > 0x147 { data[0x147] } else { 0 };
+        self.mbc_type = match cart_type {
+            0x00 => MbcType::None,
+            0x01..=0x03 => MbcType::Mbc1,
+            0x0F..=0x13 => MbcType::Mbc3,
+            _ => {
+                eprintln!("Warning: Unknown cart type 0x{:02X}, treating as MBC1", cart_type);
+                MbcType::Mbc1
+            }
+        };
+        
+        println!("Cart type: 0x{:02X} -> {:?}", cart_type, self.mbc_type);
+        
+        // Copy bank 0 to memory 0x0000-0x3FFF for compatibility
+        let len = data.len().min(0x4000);
+        self.memory[..len].copy_from_slice(&data[..len]);
+        
+        // Also copy bank 1 to 0x4000-0x7FFF initially
+        if data.len() > 0x4000 {
+            let bank1_len = (data.len() - 0x4000).min(0x4000);
+            self.memory[0x4000..0x4000 + bank1_len].copy_from_slice(&data[0x4000..0x4000 + bank1_len]);
+        }
+    }
+
+    /// Get the effective ROM bank number for MBC1/MBC3
+    fn effective_rom_bank(&self) -> usize {
+        let mut bank = self.rom_bank as usize;
+        
+        // Bank 0 is not selectable in 0x4000-0x7FFF region
+        if bank == 0 {
+            bank = 1;
+        }
+        
+        // In MBC1 ROM banking mode, upper 2 bits from ram_bank extend the bank number
+        if self.mbc_type == MbcType::Mbc1 && !self.banking_mode {
+            bank |= (self.ram_bank as usize & 0x03) << 5;
+        }
+        
+        // Mask to actual ROM size
+        let num_banks = (self.rom.len() / 0x4000).max(1);
+        bank % num_banks
     }
 
     #[inline]
     pub fn read_byte(&self, addr: u16) -> u8 {
         match addr {
-            0xFF00 => {
-                let select = self.memory[0xFF00];
-                let mut result = 0xCF | (select & 0x30); // bits 6-7 high, lower 4 high
-                if select & 0x20 == 0 { result &= 0xF0 | self.joypad_action; }
-                if select & 0x10 == 0 { result &= 0xF0 | self.joypad_direction; }
-                result
+            // ROM Bank 0 (fixed)
+            0x0000..=0x3FFF => {
+                if !self.rom.is_empty() {
+                    self.rom[addr as usize]
+                } else {
+                    self.memory[addr as usize]
+                }
             }
+            
+            // ROM Bank 1+ (switchable for MBC)
+            0x4000..=0x7FFF => {
+                if self.mbc_type != MbcType::None && !self.rom.is_empty() {
+                    let bank = self.effective_rom_bank();
+                    let rom_addr = bank * 0x4000 + (addr as usize - 0x4000);
+                    if rom_addr < self.rom.len() {
+                        self.rom[rom_addr]
+                    } else {
+                        0xFF
+                    }
+                } else if !self.rom.is_empty() && (addr as usize) < self.rom.len() {
+                    self.rom[addr as usize]
+                } else {
+                    self.memory[addr as usize]
+                }
+            }
+            
+            // VRAM
+            0x8000..=0x9FFF => self.ppu.vram[(addr - 0x8000) as usize],
+            
+            // External RAM
+            0xA000..=0xBFFF => {
+                if self.ram_enabled && !self.eram.is_empty() {
+                    // MBC3 with RTC register selected returns 0 (stub)
+                    if self.mbc_type == MbcType::Mbc3 && self.ram_bank >= 0x08 {
+                        return 0x00;
+                    }
+                    let ram_bank = match self.mbc_type {
+                        MbcType::Mbc1 => if self.banking_mode { self.ram_bank as usize & 0x03 } else { 0 },
+                        MbcType::Mbc3 => self.ram_bank as usize & 0x03,
+                        MbcType::None => 0,
+                    };
+                    let ram_addr = ram_bank * 0x2000 + (addr as usize - 0xA000);
+                    if ram_addr < self.eram.len() {
+                        self.eram[ram_addr]
+                    } else {
+                        0xFF
+                    }
+                } else {
+                    0xFF
+                }
+            }
+
+            // OAM
+            0xFE00..=0xFE9F => self.ppu.oam[(addr - 0xFE00) as usize],
+
+            // PPU regs
+            0xFF40 => self.ppu.lcdc,
+            0xFF41 => self.ppu.stat | 0x80, // ensure bit7 reads 1
+            0xFF42 => self.ppu.scy,
+            0xFF43 => self.ppu.scx,
+            0xFF44 => self.ppu.ly,
+            0xFF45 => self.ppu.lyc,
+            0xFF46 => self.ppu.dma,
+            0xFF47 => self.ppu.bgp,
+            0xFF48 => self.ppu.obp0,
+            0xFF49 => self.ppu.obp1,
+            0xFF4A => self.ppu.wy,
+            0xFF4B => self.ppu.wx,
+
+            // Joypad
+            0xFF00 => {
+                let mut result = 0xCF; // bits 6-7 unused, bits 0-3 = all released
+                if (self.joypad_select & 0x10) == 0 {
+                    // Direction keys selected
+                    result &= 0xF0 | self.joypad_dpad;
+                }
+                if (self.joypad_select & 0x20) == 0 {
+                    // Action buttons selected
+                    result &= 0xF0 | self.joypad_buttons;
+                }
+                result | (self.joypad_select & 0x30)
+            }
+
             0xFF04 => (self.div_counter >> 8) as u8,  // DIV
             0xFF05 => self.tima,                       // TIMA
             0xFF06 => self.tma,                        // TMA
@@ -67,10 +230,101 @@ impl Bus {
     pub fn write_byte(&mut self, addr: u16, value: u8) {
 
         match addr {
-        0xFF00 => {
-            // Only bits 4-5 (select lines) are writable
-            self.memory[0xFF00] = value & 0x30;
+        // MBC registers (ROM area writes)
+        0x0000..=0x1FFF => {
+            // RAM Enable (MBC1/MBC2/MBC3/MBC5)
+            if self.mbc_type != MbcType::None {
+                self.ram_enabled = (value & 0x0F) == 0x0A;
+            }
         }
+        
+        0x2000..=0x3FFF => {
+            // ROM Bank Number
+            match self.mbc_type {
+                MbcType::Mbc1 => {
+                    let bank = value & 0x1F;
+                    self.rom_bank = if bank == 0 { 1 } else { bank };
+                }
+                MbcType::Mbc3 => {
+                    // MBC3 uses 7 bits for ROM bank
+                    let bank = value & 0x7F;
+                    self.rom_bank = if bank == 0 { 1 } else { bank };
+                }
+                MbcType::None => {}
+            }
+        }
+        
+        0x4000..=0x5FFF => {
+            // RAM Bank / Upper ROM Bank bits
+            match self.mbc_type {
+                MbcType::Mbc1 => {
+                    self.ram_bank = value & 0x03;
+                }
+                MbcType::Mbc3 => {
+                    // MBC3: 0x00-0x03 = RAM bank, 0x08-0x0C = RTC registers (not implemented)
+                    self.ram_bank = value;
+                }
+                MbcType::None => {}
+            }
+        }
+        
+        0x6000..=0x7FFF => {
+            // Banking Mode Select
+            if self.mbc_type == MbcType::Mbc1 {
+                self.banking_mode = (value & 0x01) != 0;
+            }
+        }
+        
+        // VRAM
+        0x8000..=0x9FFF => {
+            self.ppu.vram[(addr - 0x8000) as usize] = value;
+        }
+        
+        // External RAM
+        0xA000..=0xBFFF => {
+            if self.ram_enabled && !self.eram.is_empty() {
+                // MBC3 with RTC register selected - ignore writes (stub)
+                if self.mbc_type == MbcType::Mbc3 && self.ram_bank >= 0x08 {
+                    return;
+                }
+                let ram_bank = match self.mbc_type {
+                    MbcType::Mbc1 => if self.banking_mode { self.ram_bank as usize & 0x03 } else { 0 },
+                    MbcType::Mbc3 => self.ram_bank as usize & 0x03,
+                    MbcType::None => 0,
+                };
+                let ram_addr = ram_bank * 0x2000 + (addr as usize - 0xA000);
+                if ram_addr < self.eram.len() {
+                    self.eram[ram_addr] = value;
+                }
+            }
+        }
+
+        // OAM
+        0xFE00..=0xFE9F => {
+            self.ppu.oam[(addr - 0xFE00) as usize] = value;
+        }
+
+        // PPU regs
+        0xFF40 => { self.ppu.lcdc = value; }
+        0xFF41 => {
+            // STAT: only bits 6..3 writable; bits 2..0 are read-only (coincidence+mode)
+            self.ppu.stat = (self.ppu.stat & 0x07) | (value & 0x78) | 0x80;
+        }
+        0xFF42 => { self.ppu.scy = value; }
+        0xFF43 => { self.ppu.scx = value; }
+        0xFF44 => { /* LY is read-only; ignore */ }
+        0xFF45 => { self.ppu.lyc = value; }
+        0xFF00 => { self.joypad_select = value & 0x30; } // Joypad - only bits 4-5 writable
+        0xFF47 => { self.ppu.bgp = value; }
+        0xFF48 => { self.ppu.obp0 = value; }
+        0xFF49 => { self.ppu.obp1 = value; }
+        0xFF4A => { self.ppu.wy = value; }
+        0xFF4B => { self.ppu.wx = value; }
+        0xFF46 => {
+            self.ppu.dma = value;
+            self.do_oam_dma(value);
+        }
+
         0xFF02 => {
             // Serial output: write to 0xFF01, then 0xFF02 with 0x81 to print the character in 0xFF01.
             if value == 0x81 {
@@ -199,5 +453,28 @@ impl Bus {
             self.increment_tima();
         }
         self.prev_and = new_and;
+    }
+
+    fn do_oam_dma(&mut self, value: u8) {
+        let source = (value as u16) << 8; // XX00
+        for i in 0..0xA0u16 {
+            let b = self.read_byte(source + i);
+            self.ppu.oam[i as usize] = b;
+        }
+    }
+
+    pub fn tick(&mut self, cycles: u16) {
+        for _ in 0..cycles {
+            self.tick_timer();
+        }
+
+        let mut pending_irqs: u8 = 0;
+        let mut req = |bit: u8| {
+            pending_irqs |= bit & 0x1F;
+        };
+        self.ppu.step(cycles, &mut req);
+        if pending_irqs != 0 {
+            self.request_interrupt(pending_irqs);
+        }
     }
 }
