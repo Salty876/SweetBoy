@@ -1,15 +1,212 @@
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-   0.022535600s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint: stale: changed "C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\gb_core\\src\\ppu\\mod.rs"
-   0.022554000s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint:           (vs) "C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\desktop\\target\\debug\\.fingerprint\\gb_core-a788f507f6de7308\\dep-lib-gb_core"
-   0.022559400s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint:                FileTime { seconds: 13415964584, nanos: 282204600 } < FileTime { seconds: 13415964598, nanos: 955956400 }
-   0.025650200s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint: fingerprint dirty for desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop)/Check { test: false }/TargetInner { name: "desktop", doc: true, ..: with_path("C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\desktop\\src\\main.rs", Edition2024) }
-   0.025677700s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleDepFingerprint { name: "gb_core" })
-   0.026352500s  INFO prepare_target{force=false package_id=gb_core v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\gb_core) target="gb_core"}: cargo::core::compiler::fingerprint: fingerprint dirty for gb_core v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\gb_core)/Check { test: false }/TargetInner { name_inferred: true, ..: lib_target("gb_core", ["lib"], "C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\gb_core\\src\\lib.rs", Edition2024) }
-   0.026376900s  INFO prepare_target{force=false package_id=gb_core v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\gb_core) target="gb_core"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleItem(ChangedFile { reference: "C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\desktop\\target\\debug\\.fingerprint\\gb_core-a788f507f6de7308\\dep-lib-gb_core", reference_mtime: FileTime { seconds: 13415964584, nanos: 282204600 }, stale: "C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\gb_core\\src\\ppu\\mod.rs", stale_mtime: FileTime { seconds: 13415964598, nanos: 955956400 } }))
-   0.030385400s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint: fingerprint dirty for desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop)/Check { test: true }/TargetInner { name: "desktop", doc: true, ..: with_path("C:\\Users\\Saleh\\Documents\\Programming projects\\LebronBoy\\desktop\\src\\main.rs", Edition2024) }
-   0.030403800s  INFO prepare_target{force=false package_id=desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop) target="desktop"}: cargo::core::compiler::fingerprint:     dirty: FsStatusOutdated(StaleDepFingerprint { name: "gb_core" })
-    Checking gb_core v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\gb_core)
-    Checking desktop v0.1.0 (C:\Users\Saleh\Documents\Programming projects\LebronBoy\desktop)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.53s
+   0.014342333s  INFO prepare_target{force=false package_id=desktop v0.1.0 (/Users/salabdoulaye/LebronBoy/desktop) target="desktop"}: cargo::core::compiler::fingerprint: fingerprint error for desktop v0.1.0 (/Users/salabdoulaye/LebronBoy/desktop)/Check { test: false }/TargetInner { name: "desktop", doc: true, ..: with_path("/Users/salabdoulaye/LebronBoy/desktop/src/main.rs", Edition2024) }
+   0.014353750s  INFO prepare_target{force=false package_id=desktop v0.1.0 (/Users/salabdoulaye/LebronBoy/desktop) target="desktop"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/salabdoulaye/LebronBoy/desktop/target/debug/.fingerprint/desktop-a4273c83604039ad/bin-desktop`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: std::rt::lang_start_internal
+  16: _main
+   0.033584833s  INFO prepare_target{force=false package_id=sdl2 v0.38.0 target="sdl2"}: cargo::core::compiler::fingerprint: fingerprint error for sdl2 v0.38.0/Check { test: false }/TargetInner { ..: lib_target("sdl2", ["lib"], "/Users/salabdoulaye/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-0.38.0/src/sdl2/lib.rs", Edition2015) }
+   0.033602083s  INFO prepare_target{force=false package_id=sdl2 v0.38.0 target="sdl2"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/salabdoulaye/LebronBoy/desktop/target/debug/.fingerprint/sdl2-62ec4681050a2eaa/lib-sdl2`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   8: cargo::ops::cargo_compile::compile_ws
+   9: cargo::ops::cargo_compile::compile_with_exec
+  10: cargo::ops::cargo_compile::compile
+  11: cargo::commands::check::exec
+  12: <cargo::cli::Exec>::exec
+  13: cargo::main
+  14: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  15: std::rt::lang_start::<()>::{closure#0}
+  16: std::rt::lang_start_internal
+  17: _main
+   0.034702500s  INFO prepare_target{force=false package_id=sdl2 v0.38.0 target="build-script-build"}: cargo::core::compiler::fingerprint: fingerprint error for sdl2 v0.38.0/RunCustomBuild/TargetInner { ..: custom_build_target("build-script-build", "/Users/salabdoulaye/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-0.38.0/build.rs", Edition2015) }
+   0.034705583s  INFO prepare_target{force=false package_id=sdl2 v0.38.0 target="build-script-build"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/salabdoulaye/LebronBoy/desktop/target/debug/.fingerprint/sdl2-52b4bd7104235cd8/run-build-script-build-script-build`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::custom_build::build_work
+   6: cargo::core::compiler::compile
+   7: cargo::core::compiler::compile
+   8: cargo::core::compiler::compile
+   9: <cargo::core::compiler::build_runner::BuildRunner>::compile
+  10: cargo::ops::cargo_compile::compile_ws
+  11: cargo::ops::cargo_compile::compile_with_exec
+  12: cargo::ops::cargo_compile::compile
+  13: cargo::commands::check::exec
+  14: <cargo::cli::Exec>::exec
+  15: cargo::main
+  16: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  17: std::rt::lang_start::<()>::{closure#0}
+  18: std::rt::lang_start_internal
+  19: _main
+   0.034942208s  INFO prepare_target{force=false package_id=sdl2-sys v0.38.0 target="build-script-build"}: cargo::core::compiler::fingerprint: fingerprint error for sdl2-sys v0.38.0/RunCustomBuild/TargetInner { ..: custom_build_target("build-script-build", "/Users/salabdoulaye/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-sys-0.38.0/build.rs", Edition2018) }
+   0.034945792s  INFO prepare_target{force=false package_id=sdl2-sys v0.38.0 target="build-script-build"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/salabdoulaye/LebronBoy/desktop/target/debug/.fingerprint/sdl2-sys-6af1184c0ae75760/run-build-script-build-script-build`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::custom_build::build_work
+   6: cargo::core::compiler::compile
+   7: cargo::core::compiler::compile
+   8: cargo::core::compiler::compile
+   9: cargo::core::compiler::compile
+  10: <cargo::core::compiler::build_runner::BuildRunner>::compile
+  11: cargo::ops::cargo_compile::compile_ws
+  12: cargo::ops::cargo_compile::compile_with_exec
+  13: cargo::ops::cargo_compile::compile
+  14: cargo::commands::check::exec
+  15: <cargo::cli::Exec>::exec
+  16: cargo::main
+  17: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  18: std::rt::lang_start::<()>::{closure#0}
+  19: std::rt::lang_start_internal
+  20: _main
+   0.036976958s  INFO prepare_target{force=false package_id=sdl2-sys v0.38.0 target="sdl2_sys"}: cargo::core::compiler::fingerprint: fingerprint error for sdl2-sys v0.38.0/Check { test: false }/TargetInner { ..: lib_target("sdl2_sys", ["lib"], "/Users/salabdoulaye/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-sys-0.38.0/src/lib.rs", Edition2018) }
+   0.036981583s  INFO prepare_target{force=false package_id=sdl2-sys v0.38.0 target="sdl2_sys"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/salabdoulaye/LebronBoy/desktop/target/debug/.fingerprint/sdl2-sys-31de00b93abb8d48/lib-sdl2_sys`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: cargo::core::compiler::compile
+   7: cargo::core::compiler::compile
+   8: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   9: cargo::ops::cargo_compile::compile_ws
+  10: cargo::ops::cargo_compile::compile_with_exec
+  11: cargo::ops::cargo_compile::compile
+  12: cargo::commands::check::exec
+  13: <cargo::cli::Exec>::exec
+  14: cargo::main
+  15: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  16: std::rt::lang_start::<()>::{closure#0}
+  17: std::rt::lang_start_internal
+  18: _main
+   0.037114875s  INFO prepare_target{force=false package_id=desktop v0.1.0 (/Users/salabdoulaye/LebronBoy/desktop) target="desktop"}: cargo::core::compiler::fingerprint: fingerprint error for desktop v0.1.0 (/Users/salabdoulaye/LebronBoy/desktop)/Check { test: true }/TargetInner { name: "desktop", doc: true, ..: with_path("/Users/salabdoulaye/LebronBoy/desktop/src/main.rs", Edition2024) }
+   0.037118500s  INFO prepare_target{force=false package_id=desktop v0.1.0 (/Users/salabdoulaye/LebronBoy/desktop) target="desktop"}: cargo::core::compiler::fingerprint:     err: failed to read `/Users/salabdoulaye/LebronBoy/desktop/target/debug/.fingerprint/desktop-6d6bbacbd350f9c9/test-bin-desktop`
+
+Caused by:
+    No such file or directory (os error 2)
+
+Stack backtrace:
+   0: std::backtrace::Backtrace::create
+   1: cargo_util::paths::read_bytes
+   2: cargo_util::paths::read
+   3: cargo::core::compiler::fingerprint::_compare_old_fingerprint
+   4: cargo::core::compiler::fingerprint::prepare_target
+   5: cargo::core::compiler::compile
+   6: <cargo::core::compiler::build_runner::BuildRunner>::compile
+   7: cargo::ops::cargo_compile::compile_ws
+   8: cargo::ops::cargo_compile::compile_with_exec
+   9: cargo::ops::cargo_compile::compile
+  10: cargo::commands::check::exec
+  11: <cargo::cli::Exec>::exec
+  12: cargo::main
+  13: std::sys::backtrace::__rust_begin_short_backtrace::<fn(), ()>
+  14: std::rt::lang_start::<()>::{closure#0}
+  15: std::rt::lang_start_internal
+  16: _main
+   Compiling sdl2-sys v0.38.0
+error: failed to run custom build command for `sdl2-sys v0.38.0`
+note: To improve backtraces for build dependencies, set the CARGO_PROFILE_DEV_BUILD_OVERRIDE_DEBUG=true environment variable to enable debug information generation.
+
+Caused by:
+  process didn't exit successfully: `/Users/salabdoulaye/LebronBoy/desktop/target/debug/build/sdl2-sys-60dcacd6ed75e4ab/build-script-build` (exit status: 101)
+  --- stdout
+  CMAKE_TOOLCHAIN_FILE_aarch64-apple-darwin = None
+  CMAKE_TOOLCHAIN_FILE_aarch64_apple_darwin = None
+  HOST_CMAKE_TOOLCHAIN_FILE = None
+  CMAKE_TOOLCHAIN_FILE = None
+  CMAKE_GENERATOR_aarch64-apple-darwin = None
+  CMAKE_GENERATOR_aarch64_apple_darwin = None
+  HOST_CMAKE_GENERATOR = None
+  CMAKE_GENERATOR = None
+  CMAKE_PREFIX_PATH_aarch64-apple-darwin = None
+  CMAKE_PREFIX_PATH_aarch64_apple_darwin = None
+  HOST_CMAKE_PREFIX_PATH = None
+  CMAKE_PREFIX_PATH = None
+  CMAKE_aarch64-apple-darwin = None
+  CMAKE_aarch64_apple_darwin = None
+  HOST_CMAKE = None
+  CMAKE = None
+  -- Configuring incomplete, errors occurred!
+
+  --- stderr
+  running: cd "/Users/salabdoulaye/LebronBoy/desktop/target/debug/build/sdl2-sys-6af1184c0ae75760/out/build" && CMAKE_PREFIX_PATH="" LC_ALL="C" "cmake" "/Users/salabdoulaye/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/sdl2-sys-0.38.0/SDL" "-B" "/Users/salabdoulaye/LebronBoy/desktop/target/debug/build/sdl2-sys-6af1184c0ae75760/out/build" "-DCMAKE_OSX_ARCHITECTURES=arm64" "-DCMAKE_CONFIGURATION_TYPES=Release" "-DSDL_SHARED=ON" "-DSDL_STATIC=OFF" "-DCMAKE_INSTALL_PREFIX=/Users/salabdoulaye/LebronBoy/desktop/target/debug/build/sdl2-sys-6af1184c0ae75760/out" "-DCMAKE_C_FLAGS= -ffunction-sections -fdata-sections -fPIC --target=arm64-apple-macosx -mmacosx-version-min=14.4 -w" "-DCMAKE_C_COMPILER=/usr/bin/cc" "-DCMAKE_CXX_FLAGS= -ffunction-sections -fdata-sections -fPIC --target=arm64-apple-macosx -mmacosx-version-min=14.4 -w" "-DCMAKE_CXX_COMPILER=/usr/bin/c++" "-DCMAKE_ASM_FLAGS= -ffunction-sections -fdata-sections -fPIC --target=arm64-apple-macosx -mmacosx-version-min=14.4 -w" "-DCMAKE_ASM_COMPILER=/usr/bin/cc" "-DCMAKE_BUILD_TYPE=Release"
+  CMake Error at CMakeLists.txt:5 (cmake_minimum_required):
+    Compatibility with CMake < 3.5 has been removed from CMake.
+
+    Update the VERSION argument <min> value.  Or, use the <min>...<max> syntax
+    to tell CMake that the project requires at least <min> but has been updated
+    to work with policies introduced by <max> or earlier.
+
+    Or, add -DCMAKE_POLICY_VERSION_MINIMUM=3.5 to try configuring anyway.
+
+
+
+  thread 'main' panicked at /Users/salabdoulaye/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/cmake-0.1.57/src/lib.rs:1132:5:
+
+  command did not execute successfully, got: exit status: 1
+
+  build script failed, must exit now
+  stack backtrace:
+     0: __rustc::rust_begin_unwind
+               at /rustc/17067e9ac6d7ecb70e50f92c1944e545188d2359/library/std/src/panicking.rs:697:5
+     1: core::panicking::panic_fmt
+               at /rustc/17067e9ac6d7ecb70e50f92c1944e545188d2359/library/core/src/panicking.rs:75:14
+     2: cmake::fail
+     3: cmake::run
+     4: cmake::Config::build
+     5: build_script_build::compile_sdl2
+     6: build_script_build::main
+     7: core::ops::function::FnOnce::call_once
+  note: Some details are omitted, run with `RUST_BACKTRACE=full` for a verbose backtrace.
