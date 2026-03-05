@@ -98,85 +98,6 @@ All large arrays (`vram`, `oam`, `memory`, `framebuffer`) use the `serde-big-arr
 
 ---
 
-## Building & Running
-
-### Prerequisites
-
-- [Rust toolchain](https://rustup.rs/) (1.85+ recommended for edition 2024)
-- No external C libraries required — pure Rust dependencies
-
-### Build
-
-```bash
-cargo build --release
-```
-
-### Run
-
-```bash
-# Launch the GUI (then use File → Open ROM or drag-and-drop)
-cargo run --release -p desktop
-
-# Or pass a ROM directly
-cargo run --release -p desktop -- path/to/rom.gb
-```
-
-### Test
-
-```bash
-cargo test -p sweetboy_core
-```
-
----
-
-## Project Structure
-
-```
-.
-├── Cargo.toml                 # Workspace root
-├── sweetboy_core/             # Emulation core library
-│   ├── src/
-│   │   ├── lib.rs             # Public API: Emulator, Button, AudioSink
-│   │   ├── error.rs           # EmulatorError enum
-│   │   ├── cpu/
-│   │   │   ├── mod.rs         # CPU struct, step(), interrupt service
-│   │   │   ├── execute.rs     # Instruction execution (all opcodes)
-│   │   │   ├── instructions.rs# Instruction enum + decode tables
-│   │   │   └── registers.rs   # 8-bit registers, flags, 16-bit pairs
-│   │   ├── bus/
-│   │   │   └── mod.rs         # Memory bus, MBC1/MBC3, timer, joypad
-│   │   └── ppu/
-│   │       └── mod.rs         # PPU scanline renderer
-│   └── tests/                 # Integration tests
-├── desktop/                   # Native desktop frontend
-│   └── src/
-│       └── main.rs            # eframe app with menus, rendering, input
-├── blaarg/                    # Blargg test ROMs
-└── gb-test-roms/              # Additional test ROM suite
-```
-
----
-
-## Dependencies
-
-### sweetboy_core
-
-| Crate | Purpose |
-|---|---|
-| `serde` | Serialization framework for save states |
-| `bincode` | Compact binary encoding of save-state data |
-| `serde-big-array` | Serde support for arrays > 32 elements |
-| `bitflags` | CPU flag register as a bitfield (with serde) |
-
-### desktop
-
-| Crate | Purpose |
-|---|---|
-| `eframe` | Cross-platform native GUI framework (egui) |
-| `rfd` | Native file open/save dialogs |
-
----
-
 ## Performance
 
 - **Frame timing:** 70 224 T-cycles per frame at 4 194 304 Hz ≈ 59.73 FPS
@@ -202,11 +123,13 @@ An `AudioSink` trait is defined in `sweetboy_core` as a placeholder for future A
 - WASM frontend for browser-based play
 - Scanline / LCD shader effects
 - Debugger overlay (registers, memory viewer, breakpoints)
+- Controller support
 
 ---
 
 ## Acknowledgments
 
-- [Pan Docs](https://gbdev.io/pandocs/) — comprehensive Game Boy technical reference
-- [Blargg's test ROMs](https://github.com/retrio/gb-test-roms) — CPU instruction and timing tests
-- [egui](https://github.com/emilk/egui) — immediate-mode GUI library for Rust
+- [Pan Docs](https://gbdev.io/pandocs/)
+- [gekkio reference](https://gekkio.fi/files/gb-docs/gbctr.pdf)
+- [Blargg's test ROMs](https://github.com/retrio/gb-test-roms)
+- [egui](https://github.com/emilk/egui)
