@@ -4,4 +4,6 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-gb_core = {path = "../gb_core"}
+sweetboy_core = { path = "../sweetboy_core" }
+eframe = "0.31"
+rfd = "0.15"

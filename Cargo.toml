@@ -1,0 +1,3 @@
+[workspace]
+members = ["sweetboy_core", "desktop"]
+resolver = "2"

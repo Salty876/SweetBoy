@@ -1,0 +1,4 @@
+*.gb
+/target
+/desktop/target
+/gb_core/target
