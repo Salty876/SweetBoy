@@ -1,0 +1,13 @@
+[package]
+name = "sweetboy_core"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+bincode = "1"
+serde-big-array = "0.5"
+
+[dependencies.bitflags]
+version = "2.9.1"
+features = ["serde"]

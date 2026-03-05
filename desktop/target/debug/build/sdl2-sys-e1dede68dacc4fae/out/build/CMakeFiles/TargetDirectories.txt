@@ -1,8 +1,0 @@
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/sdl_headers_copy.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/SDL2main.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/SDL2.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/SDL2_test.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/uninstall.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/INSTALL.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/Saleh/Documents/Programming projects/LebronBoy/desktop/target/debug/build/sdl2-sys-e1dede68dacc4fae/out/build/CMakeFiles/ZERO_CHECK.dir
